@@ -15,7 +15,10 @@ module.exports = defineConfig({
   pluginOptions: {
     electronBuilder: {
       preload: path.join(__dirname, 'public/preload.js'),
-      mainProcessWatch: [path.join(__dirname, 'src/database/**/*')]
+      mainProcessWatch: [
+        path.join(__dirname, 'src/database/**/*'),
+        path.join(__dirname, 'src/apis/**/*')
+      ]
     }
   }
 });
