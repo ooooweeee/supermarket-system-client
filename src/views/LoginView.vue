@@ -4,7 +4,7 @@
       :model="formState"
       name="basic"
       :label-col="{ span: 8 }"
-      :wrapper-col="{ span: 16 }"
+      :wrapper-col="{ span: 8 }"
       autocomplete="off"
       @finish="onSubmit"
     >
@@ -30,8 +30,10 @@
         />
       </a-form-item>
 
-      <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-        <a-button type="primary" html-type="submit">登陆</a-button>
+      <a-form-item :wrapper-col="{ offset: 8, span: 8 }">
+        <a-button class="submit-btn" type="primary" html-type="submit">
+          登录
+        </a-button>
       </a-form-item>
     </a-form>
   </div>
@@ -83,7 +85,10 @@ export default defineComponent({
 .login-page {
   display: grid;
   height: 100vh;
-  justify-content: center;
   align-items: center;
+
+  .submit-btn {
+    width: 100%;
+  }
 }
 </style>

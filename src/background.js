@@ -1,7 +1,7 @@
 'use strict';
 
 import path from 'path';
-import { app, protocol, BrowserWindow } from 'electron';
+import { app, protocol, BrowserWindow, Menu } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import database from '@/database';
 
@@ -12,6 +12,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ]);
+Menu.setApplicationMenu(null);
 
 app.on('ready', async () => {
   if (!isDevelopment) {
@@ -19,7 +20,7 @@ app.on('ready', async () => {
   }
   await database().createDatatable();
   await database().asyncRun(
-    `INSERT INTO dh_employees (dh_employee_phone, dh_employee_password, dh_employee_name) VALUES ('18000000000', '000000', 'oooweee')`
+    `REPLACE INTO dh_employees (dh_employee_phone, dh_employee_password, dh_employee_name) VALUES ('18000000000', '000000', 'oooweee')`
   );
 
   const win = new BrowserWindow({
@@ -27,6 +28,7 @@ app.on('ready', async () => {
     y: 0,
     width: 1080,
     height: 720,
+    resizable: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
