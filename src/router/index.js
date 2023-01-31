@@ -1,10 +1,11 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
-import DashboradView from '@/views/DashboradView.vue';
-import GoodsView from '@/views/GoodsView.vue';
-import CategoryView from '@/views/CategoryView.vue';
-import EmployeeView from '@/views/EmployeeView.vue';
+import HomeView from '@/views/HomeView.vue';
+import CategoryView from '@/views/category/CategoryView.vue';
+import CategoryEditor from '@/views/category/CategoryEditor.vue';
+import EmployeeView from '@/views/employee/EmployeeView.vue';
+import GoodsView from '@/views/goods/GoodsView.vue';
+import StockView from '@/views/stock/StockView.vue';
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -16,8 +17,18 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'dashborad',
-          component: DashboradView
+          name: 'category',
+          component: CategoryView
+        },
+        {
+          path: ':id',
+          name: 'category-editor',
+          component: CategoryEditor
+        },
+        {
+          path: 'employee',
+          name: 'employee',
+          component: EmployeeView
         },
         {
           path: 'goods',
@@ -25,14 +36,9 @@ const router = createRouter({
           component: GoodsView
         },
         {
-          path: 'category',
-          name: 'category',
-          component: CategoryView
-        },
-        {
-          path: 'employee',
-          name: 'employee',
-          component: EmployeeView
+          path: 'stock',
+          name: 'stock',
+          component: StockView
         }
       ]
     },

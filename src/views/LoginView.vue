@@ -4,16 +4,19 @@
       :model="formState"
       name="basic"
       :label-col="{ span: 8 }"
-      :wrapper-col="{ span: 16 }"
+      :wrapper-col="{ span: 8 }"
       autocomplete="off"
       @finish="onSubmit"
     >
       <a-form-item
-        label="账号"
+        label="账户"
         name="account"
         :rules="[{ required: true, message: '请输入手机号码' }]"
       >
-        <a-input v-model:value="formState.account" placeholder="手机号码" />
+        <a-input
+          v-model:value="formState.account"
+          placeholder="请输入手机号码"
+        />
       </a-form-item>
 
       <a-form-item
@@ -23,12 +26,14 @@
       >
         <a-input-password
           v-model:value="formState.password"
-          placeholder="用户密码"
+          placeholder="请输入密码"
         />
       </a-form-item>
 
-      <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-        <a-button type="primary" html-type="submit">登录</a-button>
+      <a-form-item :wrapper-col="{ offset: 8, span: 8 }">
+        <a-button class="submit-btn" type="primary" html-type="submit">
+          登录
+        </a-button>
       </a-form-item>
     </a-form>
   </div>
@@ -36,6 +41,7 @@
 
 <script>
 import { defineComponent, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 import { Form, Input, Button } from 'ant-design-vue';
 
 export default defineComponent({
@@ -47,25 +53,42 @@ export default defineComponent({
     [Button.name]: Button
   },
   setup() {
+    const router = useRouter();
     const formState = reactive({
-      account: '',
-      password: ''
+      account: '18000000000',
+      password: '000000'
     });
+
     return {
       formState,
-      onSubmit(...args) {
-        console.log(args);
+      onSubmit({ account, password }) {
+        window.ipcRenderer
+          .invoke('api/login', { account, password })
+          .then(({ code, msg } = {}) => {
+            if (code !== 0) {
+              throw msg;
+            }
+            router.push({
+              name: 'home'
+            });
+          })
+          .catch(err => {
+            console.error('error is ', err);
+          });
       }
     };
   }
 });
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .login-page {
-  height: 100vh;
   display: grid;
-  align-content: center;
-  justify-content: center;
+  height: 100vh;
+  align-items: center;
+
+  .submit-btn {
+    width: 100%;
+  }
 }
 </style>

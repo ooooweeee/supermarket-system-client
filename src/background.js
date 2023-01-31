@@ -4,7 +4,8 @@ import path from 'path';
 import { app, protocol, BrowserWindow, Menu } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import database from '@/database';
-import './apis';
+
+import '@/apis/index';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -17,15 +18,17 @@ app.on('ready', async () => {
   if (!isDevelopment) {
     createProtocol('app');
   }
-
-  const db = database();
-  await db.createDatatable();
+  await database().createDatatable();
+  await database().asyncRun(
+    `REPLACE INTO dh_employees (dh_employee_phone, dh_employee_password, dh_employee_name) VALUES ('18000000000', '000000', 'oooweee')`
+  );
 
   const win = new BrowserWindow({
     x: 0,
     y: 0,
-    width: 800,
-    height: 600,
+    width: 1080,
+    height: 720,
+    resizable: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
