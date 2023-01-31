@@ -88,7 +88,6 @@ export default defineComponent({
           if (code !== 0) {
             throw msg;
           }
-          console.log(data);
           catagories.value = data.map(item => {
             return {
               id: item.dh_category_id,
@@ -96,9 +95,6 @@ export default defineComponent({
               state: item.dh_category_state === 0
             };
           });
-        })
-        .catch(err => {
-          console.error('error is ', err);
         });
     }
 

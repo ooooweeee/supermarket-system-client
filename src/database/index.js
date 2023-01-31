@@ -51,7 +51,7 @@ class DB {
         dh_employee_address TEXT,
         dh_employee_state INTEGER DEFAULT 0,
         dh_employee_update_date TEXT DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'localtime'))
-        )`),
+      )`),
       this.asyncRun(`CREATE TABLE IF NOT EXISTS dh_categories (
         dh_category_id INTEGER PRIMARY KEY AUTOINCREMENT,
         dh_category_name TEXT NOT NULL UNIQUE,

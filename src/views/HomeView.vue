@@ -6,7 +6,7 @@
           <alibaba-outlined />
         </div>
         <router-link :to="{ name: 'employee' }" custom v-slot="{ navigate }">
-          <a-menu-item :disabled="true" @click="navigate" key="employee">
+          <a-menu-item :disabled="false" @click="navigate" key="employee">
             <team-outlined />
             <span>人员管理</span>
           </a-menu-item>

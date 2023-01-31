@@ -69,7 +69,7 @@ export default defineComponent({
               throw msg;
             }
             router.push({
-              name: 'home'
+              name: 'employee'
             });
           })
           .catch(err => {
