@@ -10,6 +10,7 @@
     :class="['categories-content', !catagories.length && 'is-empty']"
   >
     <a-empty v-if="!catagories.length">
+      <template #description>暂无品类</template>
       <a-button type="primary" @click="visible = true">创建</a-button>
     </a-empty>
     <a-row v-else :gutter="[16, 16]">
@@ -24,10 +25,13 @@
               :preview="false"
             />
           </template>
-          <a-card-meta
-            :title="item.name"
-            description="This is the description"
-          />
+          <a-card-meta>
+            <template #title>
+              {{ item.name }}
+              <a-tag color="red" v-if="item.state">禁售</a-tag>
+            </template>
+            <template #description>This is the description</template>
+          </a-card-meta>
         </a-card>
       </a-col>
     </a-row>
@@ -53,7 +57,8 @@ import {
   Image,
   Empty,
   Button,
-  Modal
+  Modal,
+  Tag
 } from 'ant-design-vue';
 import CreateCategory from '@/components/CreateCategory.vue';
 
@@ -69,7 +74,8 @@ export default defineComponent({
     'a-empty': Empty,
     [Button.name]: Button,
     [Modal.name]: Modal,
-    CreateCategory
+    CreateCategory,
+    [Tag.name]: Tag
   },
   setup() {
     const visible = ref(false);
@@ -82,10 +88,12 @@ export default defineComponent({
           if (code !== 0) {
             throw msg;
           }
+          console.log(data);
           catagories.value = data.map(item => {
             return {
               id: item.dh_category_id,
-              name: item.dh_category_name
+              name: item.dh_category_name,
+              state: item.dh_category_state === 0
             };
           });
         })

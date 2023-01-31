@@ -9,7 +9,6 @@ const dbDir = path.join(app.getPath('userData'), 'database');
 
 class DB {
   constructor() {
-    fs.rmdirSync(dbDir, { recursive: true });
     fs.mkdirSync(dbDir, { recursive: true });
     this.db = new Database(path.join(dbDir, 'db_management.db'));
     this.db.serialize(async () => {

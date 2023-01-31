@@ -4,9 +4,10 @@ import database from '@/database';
 ipcMain.handle('api/login', async (_, { account, password } = {}) => {
   return database()
     .asyncGet(
-      `SELECT dh_employee_name FROM dh_employees WHERE dh_employee_phone = ${account} & dh_employee_password = ${password}`
+      `SELECT dh_employee_name FROM dh_employees WHERE dh_employee_phone='${account}' and dh_employee_password='${password}'`
     )
     .then(res => {
+      console.log(res);
       if (!res) {
         throw '账号或密码错误';
       }

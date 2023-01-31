@@ -42,7 +42,7 @@
 <script>
 import { defineComponent, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { Form, Input, Button } from 'ant-design-vue';
+import { Form, Input, Button, notification } from 'ant-design-vue';
 
 export default defineComponent({
   components: {
@@ -73,7 +73,9 @@ export default defineComponent({
             });
           })
           .catch(err => {
-            console.error('error is ', err);
+            notification.error({
+              message: err
+            });
           });
       }
     };

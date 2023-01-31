@@ -14,7 +14,7 @@
         <router-link :to="{ name: 'category' }" custom v-slot="{ navigate }">
           <a-menu-item @click="navigate" key="category">
             <tags-outlined />
-            <span>商品品类</span>
+            <span>品类管理</span>
           </a-menu-item>
         </router-link>
         <router-link :to="{ name: 'goods' }" custom v-slot="{ navigate }">

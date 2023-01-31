@@ -36,8 +36,6 @@ app.on('ready', async () => {
     }
   });
 
-  console.log(process.env.WEBPACK_DEV_SERVER_URL);
-
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL + '#/login');
     if (isDevelopment) win.webContents.openDevTools();

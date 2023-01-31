@@ -18,7 +18,6 @@
         :preview="false"
       />
     </a-form-item>
-
     <a-form-item
       label="品类名称"
       name="name"
@@ -27,9 +26,12 @@
       <a-input v-model:value="formState.name" placeholder="请输入品类名称" />
     </a-form-item>
     <a-form-item label="销售状态" name="state">
-      <a-switch v-model:checked="formState.state" />
+      <a-switch
+        v-model:checked="formState.state"
+        checked-children="正常"
+        un-checked-children="禁售"
+      />
     </a-form-item>
-
     <a-form-item :wrapper-col="{ offset: 8, span: 8 }">
       <a-button class="submit-btn" type="primary" html-type="submit">
         创建
@@ -40,7 +42,14 @@
 
 <script>
 import { defineComponent, reactive } from 'vue';
-import { Form, Input, Button, Image, Switch } from 'ant-design-vue';
+import {
+  Form,
+  Input,
+  Button,
+  Image,
+  Switch,
+  notification
+} from 'ant-design-vue';
 
 export default defineComponent({
   emits: ['create-success'],
@@ -67,10 +76,15 @@ export default defineComponent({
             if (code !== 0) {
               throw msg;
             }
+            notification.success({
+              message: '创建成功'
+            });
             emit('create-success');
           })
-          .catch(err => {
-            console.error('error is ', err);
+          .catch(() => {
+            notification.error({
+              message: '创建失败'
+            });
           });
       }
     };
