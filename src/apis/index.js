@@ -74,14 +74,14 @@ ipcMain.handle('api/employees', async () => {
     });
 });
 
-ipcMain.handle('api/employee/editor', async (_, { phone, state } = {}) => {
+ipcMain.handle('api/employee/editor', async (_, { id, state } = {}) => {
   return database()
     .asyncRun(
       `UPDATE dh_employees SET
         dh_employee_state=${state},
         dh_employee_update_date='${dayjs().format('YYYY-MM-DD HH:mm:ss')}'
       WHERE
-        dh_employee_phone=${phone}`
+        dh_employee_id=${id}`
     )
     .then(() => {
       return {
@@ -92,3 +92,28 @@ ipcMain.handle('api/employee/editor', async (_, { phone, state } = {}) => {
       return Promise.resolve({ code: -1, msg: err });
     });
 });
+
+ipcMain.handle(
+  'api/employee/create',
+  async (_, { phone, password, name, sex, address, state } = {}) => {
+    return database()
+      .asyncRun(
+        `INSERT INTO dh_employees (
+          dh_employee_phone,
+          dh_employee_password,
+          dh_employee_name,
+          dh_employee_sex,
+          dh_employee_address,
+          dh_employee_state
+        ) VALUES ('${phone}', '${password}', '${name}', ${sex}, '${address}', ${state})`
+      )
+      .then(() => {
+        return {
+          code: 0
+        };
+      })
+      .catch(err => {
+        return Promise.resolve({ code: -1, msg: err });
+      });
+  }
+);

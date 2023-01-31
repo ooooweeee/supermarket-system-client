@@ -41,7 +41,7 @@
       :footer="null"
       :destroyOnClose="true"
     >
-      <CreateCategory @create-success="createCategory()" />
+      <create-category @create-success="createCategory()" />
     </a-modal>
   </a-layout-content>
 </template>

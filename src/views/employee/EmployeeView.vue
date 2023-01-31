@@ -1,33 +1,49 @@
 <template>
-  <a-page-header
-    title="人员管理"
-    sub-title="This is a subtitle"
-  ></a-page-header>
+  <a-page-header title="人员管理" sub-title="This is a subtitle">
+    <template #extra>
+      <a-button @click="visible = true" type="primary">新增</a-button>
+    </template>
+  </a-page-header>
   <a-layout-content class="employee-content">
     <a-table :dataSource="employees" :columns="columns" :pagination="false">
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'sex'">
-          <man-outlined v-if="record.sex === 1" />
-          <woman-outlined v-else-if="record.sex === 2" />
-          <span v-else>popp</span>
+          <man-outlined v-if="record.sex === 0" />
+          <woman-outlined v-else />
         </template>
         <template v-if="column.key === 'state'">
           <a-switch
             :checked="record.state"
             checked-children="正常"
             un-checked-children="封存"
-            @change="updateEmployee(record.phone, record.state ? 1 : 0)"
+            @change="updateEmployee(record.id, record.state ? 1 : 0)"
           />
         </template>
       </template>
     </a-table>
+    <a-modal
+      v-model:visible="visible"
+      title="添加新员工"
+      :footer="null"
+      :destroyOnClose="true"
+    >
+      <add-employee @create-success="addEmployee()" />
+    </a-modal>
   </a-layout-content>
 </template>
 
 <script>
 import { defineComponent, ref, onMounted } from 'vue';
-import { PageHeader, Layout, Table, Switch } from 'ant-design-vue';
+import {
+  PageHeader,
+  Layout,
+  Table,
+  Switch,
+  Button,
+  Modal
+} from 'ant-design-vue';
 import { ManOutlined, WomanOutlined } from '@ant-design/icons-vue';
+import AddEmployee from '@/components/AddEmployee.vue';
 
 export default defineComponent({
   components: {
@@ -36,9 +52,13 @@ export default defineComponent({
     [Table.name]: Table,
     ManOutlined,
     WomanOutlined,
-    [Switch.name]: Switch
+    [Switch.name]: Switch,
+    [Button.name]: Button,
+    [Modal.name]: Modal,
+    AddEmployee
   },
   setup() {
+    const visible = ref(false);
     const employees = ref([]);
 
     function getData() {
@@ -48,7 +68,6 @@ export default defineComponent({
           if (code !== 0) {
             throw msg;
           }
-          console.log(data);
           employees.value = data.map(item => {
             return {
               id: item.dh_employee_id,
@@ -67,6 +86,7 @@ export default defineComponent({
     });
 
     return {
+      visible,
       employees,
       columns: [
         {
@@ -95,15 +115,19 @@ export default defineComponent({
           key: 'state'
         }
       ],
-      updateEmployee(phone, state) {
+      updateEmployee(id, state) {
         window.ipcRenderer
-          .invoke('api/employee/editor', { phone, state })
+          .invoke('api/employee/editor', { id, state })
           .then(({ code, msg } = {}) => {
             if (code !== 0) {
               throw msg;
             }
             getData();
           });
+      },
+      addEmployee() {
+        visible.value = false;
+        getData();
       }
     };
   }
