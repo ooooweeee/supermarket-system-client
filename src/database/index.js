@@ -70,9 +70,11 @@ class DB {
       )`),
       this.asyncRun(`CREATE TABLE IF NOT EXISTS dh_incidents (
         dh_incident_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        dh_incident_order TEXT NOT NULL,
         dh_incident_action INTEGER NOT NULL,
         dh_incident_goods_id INTEGER NOT NULL,
         dh_incident_sale_num INTEGER NOT NULL,
+        dh_incident_employee_id INTEGER NOT NULL,
         dh_incident_update_date TEXT DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'localtime'))
       )`)
     ]);

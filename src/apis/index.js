@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import dayjs from 'dayjs';
+import { v4 as uuid } from 'uuid';
 import database from '@/database';
 
 ipcMain.handle('api/login', async (_, { account, password } = {}) => {
@@ -203,15 +204,27 @@ ipcMain.handle('api/goods/state', async (_, { id, state } = {}) => {
 });
 
 ipcMain.handle('api/goods/sale', async (_, list = []) => {
-  return Promise.all(
-    list.map(item => {
-      return database().asyncRun(`
-        UPDATE dh_goods SET
-          dh_goods_store=${item.remain},
-          dh_goods_update_date='${dayjs().format('YYYY-MM-DD HH:mm:ss')}'
-        WHERE dh_goods_id=${item.id}`);
+  const db = database();
+  const orderId = uuid();
+  return Promise.all([
+    ...list.map(item => {
+      return db.asyncRun(`
+          UPDATE dh_goods SET
+            dh_goods_store=${item.remain},
+            dh_goods_update_date='${dayjs().format('YYYY-MM-DD HH:mm:ss')}'
+          WHERE dh_goods_id=${item.id}`);
+    }),
+    ...list.map(item => {
+      return db.asyncRun(`
+          INSERT INTO dh_incidents (
+            dh_incident_order,
+            dh_incident_action,
+            dh_incident_goods_id,
+            dh_incident_sale_num,
+            dh_incident_employee_id
+          ) VALUES ('${orderId}', 0, ${item.id}, ${item.num}, 0)`);
     })
-  )
+  ])
     .then(() => {
       return {
         code: 0
