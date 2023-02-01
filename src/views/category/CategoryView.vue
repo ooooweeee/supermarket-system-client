@@ -82,20 +82,15 @@ export default defineComponent({
     const catagories = ref([]);
 
     function getData() {
-      window.ipcRenderer
-        .invoke('api/categories')
-        .then(({ code, msg, data } = {}) => {
-          if (code !== 0) {
-            throw msg;
-          }
-          catagories.value = data.map(item => {
-            return {
-              id: item.dh_category_id,
-              name: item.dh_category_name,
-              state: item.dh_category_state === 0
-            };
-          });
+      window.ipcRenderer.invoke('api/categories').then(({ data } = {}) => {
+        catagories.value = data.map(item => {
+          return {
+            id: item.dh_category_id,
+            name: item.dh_category_name,
+            state: item.dh_category_state === 0
+          };
         });
+      });
     }
 
     onMounted(() => {

@@ -62,23 +62,18 @@ export default defineComponent({
     const employees = ref([]);
 
     function getData() {
-      window.ipcRenderer
-        .invoke('api/employees')
-        .then(({ code, msg, data } = {}) => {
-          if (code !== 0) {
-            throw msg;
-          }
-          employees.value = data.map(item => {
-            return {
-              id: item.dh_employee_id,
-              name: item.dh_employee_name,
-              phone: item.dh_employee_phone,
-              sex: item.dh_employee_sex,
-              address: item.dh_employee_address,
-              state: item.dh_employee_state === 0
-            };
-          });
+      window.ipcRenderer.invoke('api/employees').then(({ data } = {}) => {
+        employees.value = data.map(item => {
+          return {
+            id: item.dh_employee_id,
+            name: item.dh_employee_name,
+            phone: item.dh_employee_phone,
+            sex: item.dh_employee_sex,
+            address: item.dh_employee_address,
+            state: item.dh_employee_state === 0
+          };
         });
+      });
     }
 
     onMounted(() => {
