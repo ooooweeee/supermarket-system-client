@@ -5,6 +5,7 @@ import CategoryView from '@/views/category/CategoryView.vue';
 import EmployeeView from '@/views/employee/EmployeeView.vue';
 import GoodsView from '@/views/goods/GoodsView.vue';
 import StockView from '@/views/stock/StockView.vue';
+import OrderView from '@/views/order/OrderView.vue';
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -33,6 +34,11 @@ const router = createRouter({
           path: 'stock',
           name: 'stock',
           component: StockView
+        },
+        {
+          path: 'order',
+          name: 'order',
+          component: OrderView
         }
       ]
     },

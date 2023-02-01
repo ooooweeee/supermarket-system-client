@@ -29,6 +29,12 @@
             <span>库存管理</span>
           </a-menu-item>
         </router-link>
+        <router-link :to="{ name: 'order' }" custom v-slot="{ navigate }">
+          <a-menu-item @click="navigate" key="order">
+            <gold-outlined />
+            <span>订单管理</span>
+          </a-menu-item>
+        </router-link>
       </a-menu>
     </a-layout-sider>
     <a-layout>

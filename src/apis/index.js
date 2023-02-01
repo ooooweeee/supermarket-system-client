@@ -18,7 +18,8 @@ ipcMain.handle('api/login', async (_, { account, password } = {}) => {
       return {
         code: 0,
         data: {
-          user_name: res.dh_employee_name
+          dh_employee_id: res.dh_employee_id,
+          dh_employee_name: res.dh_employee_name
         }
       };
     })
@@ -222,12 +223,30 @@ ipcMain.handle('api/goods/sale', async (_, list = []) => {
             dh_incident_goods_id,
             dh_incident_sale_num,
             dh_incident_employee_id
-          ) VALUES ('${orderId}', 0, ${item.id}, ${item.num}, 0)`);
+          ) VALUES ('${orderId}', 0, ${item.id}, ${item.num}, ${item.userId})`);
     })
   ])
     .then(() => {
       return {
         code: 0
+      };
+    })
+    .catch(err => {
+      return Promise.resolve({ code: -1, msg: err });
+    });
+});
+
+ipcMain.handle('api/incidents', async () => {
+  return database()
+    .asyncAll(
+      `SELECT * FROM dh_incidents
+      LEFT JOIN dh_employees ON dh_incidents.dh_incident_employee_id=dh_employees.dh_employee_id
+      LEFT JOIN dh_goods ON dh_incidents.dh_incident_goods_id=dh_goods.dh_goods_id`
+    )
+    .then((res = []) => {
+      return {
+        code: 0,
+        data: res
       };
     })
     .catch(err => {

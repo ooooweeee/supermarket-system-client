@@ -42,6 +42,7 @@
 <script>
 import { defineComponent, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { Form, Input, Button, notification } from 'ant-design-vue';
 
 export default defineComponent({
@@ -53,6 +54,7 @@ export default defineComponent({
     [Button.name]: Button
   },
   setup() {
+    const store = useStore();
     const router = useRouter();
     const formState = reactive({
       account: '18000000000',
@@ -64,10 +66,11 @@ export default defineComponent({
       onSubmit({ account, password }) {
         window.ipcRenderer
           .invoke('api/login', { account, password })
-          .then(({ code, msg } = {}) => {
+          .then(({ code, msg, data } = {}) => {
             if (code !== 0) {
               throw msg;
             }
+            store.commit('setUserId', data.dh_employee_id);
             router.push({
               name: 'employee'
             });

@@ -80,6 +80,7 @@
 
 <script>
 import { defineComponent, onMounted, ref, computed } from 'vue';
+import { useStore } from 'vuex';
 import {
   Layout,
   Row,
@@ -120,6 +121,7 @@ export default defineComponent({
     ShoppingOutlined
   },
   setup() {
+    const store = useStore();
     const goodsList = ref([]);
     const shoppingCar = ref([]);
     const paying = ref(false);
@@ -214,7 +216,8 @@ export default defineComponent({
               return {
                 id: item.id,
                 num: item.num,
-                remain: item.store - item.num
+                remain: item.store - item.num,
+                userId: store.state.userId
               };
             })
           )
