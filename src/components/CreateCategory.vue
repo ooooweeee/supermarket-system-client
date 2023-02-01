@@ -71,7 +71,7 @@ export default defineComponent({
       formState,
       onSubmit({ name, state }) {
         window.ipcRenderer
-          .invoke('api/category/create', { name, state: state ? 1 : 0 })
+          .invoke('api/category/create', { name, state: state ? 0 : 1 })
           .then(({ code, msg } = {}) => {
             if (code !== 0) {
               throw msg;

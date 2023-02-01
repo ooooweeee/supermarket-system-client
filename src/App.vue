@@ -10,6 +10,9 @@
   width: 0;
 }
 .hand {
-  cursor: pointer;
+  cursor: pointer !important;
+}
+.no-hand {
+  cursor: default !important;
 }
 </style>

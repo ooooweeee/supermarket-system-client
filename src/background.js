@@ -24,8 +24,6 @@ app.on('ready', async () => {
   );
 
   const win = new BrowserWindow({
-    x: 0,
-    y: 0,
     width: 1080,
     height: 720,
     resizable: false,
@@ -40,6 +38,6 @@ app.on('ready', async () => {
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL + '#/login');
     if (isDevelopment) win.webContents.openDevTools();
   } else {
-    win.loadURL('app://./index.html');
+    win.loadURL('app://./index.html/#/login');
   }
 });

@@ -15,22 +15,27 @@
     </a-empty>
     <a-row v-else :gutter="[16, 16]">
       <a-col v-for="item in catagories" :key="item.id" :span="8">
-        <a-card hoverable>
+        <a-card hoverable class="no-hand">
           <template #cover>
             <a-image
               class="categories-pic"
-              :height="195"
+              :height="182"
               src=""
               fallback="/fallback.png"
               :preview="false"
             />
           </template>
-          <a-card-meta>
-            <template #title>
-              {{ item.name }}
-              <a-tag color="red" v-if="item.state">禁售</a-tag>
+          <a-card-meta :title="item.name">
+            <template #description>
+              <div class="category-ctrl">
+                <a-switch
+                  :checked="item.state"
+                  checked-children="正常"
+                  un-checked-children="禁售"
+                  @change="updateCategory(item.id, item.state ? 1 : 0)"
+                />
+              </div>
             </template>
-            <template #description>This is the description</template>
           </a-card-meta>
         </a-card>
       </a-col>
@@ -58,7 +63,8 @@ import {
   Empty,
   Button,
   Modal,
-  Tag
+  Tag,
+  Switch
 } from 'ant-design-vue';
 import CreateCategory from '@/components/CreateCategory.vue';
 
@@ -75,7 +81,8 @@ export default defineComponent({
     [Button.name]: Button,
     [Modal.name]: Modal,
     CreateCategory,
-    [Tag.name]: Tag
+    [Tag.name]: Tag,
+    [Switch.name]: Switch
   },
   setup() {
     const visible = ref(false);
@@ -100,6 +107,13 @@ export default defineComponent({
     return {
       visible,
       catagories,
+      updateCategory(id, state) {
+        window.ipcRenderer
+          .invoke('api/category/editor', { id, state })
+          .then(() => {
+            getData();
+          });
+      },
       createCategory() {
         visible.value = false;
         getData();
@@ -124,6 +138,12 @@ export default defineComponent({
   &.is-empty {
     display: grid;
     align-items: center;
+  }
+
+  .category-ctrl {
+    box-sizing: border-box;
+    padding: 5px;
+    text-align: right;
   }
 }
 </style>

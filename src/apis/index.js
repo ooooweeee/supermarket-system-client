@@ -55,6 +55,25 @@ ipcMain.handle('api/category/create', async (_, { name, state } = {}) => {
     });
 });
 
+ipcMain.handle('api/category/editor', async (_, { id, state } = {}) => {
+  return database()
+    .asyncRun(
+      `UPDATE dh_categories SET
+        dh_category_state=${state},
+        dh_category_update_date='${dayjs().format('YYYY-MM-DD HH:mm:ss')}'
+      WHERE
+        dh_category_id=${id}`
+    )
+    .then(() => {
+      return {
+        code: 0
+      };
+    })
+    .catch(err => {
+      return Promise.resolve({ code: -1, msg: err });
+    });
+});
+
 ipcMain.handle('api/employees', async () => {
   return database()
     .asyncAll(
@@ -173,6 +192,26 @@ ipcMain.handle('api/goods/state', async (_, { id, state } = {}) => {
       WHERE
         dh_goods_id=${id}`
     )
+    .then(() => {
+      return {
+        code: 0
+      };
+    })
+    .catch(err => {
+      return Promise.resolve({ code: -1, msg: err });
+    });
+});
+
+ipcMain.handle('api/goods/sale', async (_, list = []) => {
+  return Promise.all(
+    list.map(item => {
+      return database().asyncRun(`
+        UPDATE dh_goods SET
+          dh_goods_store=${item.remain},
+          dh_goods_update_date='${dayjs().format('YYYY-MM-DD HH:mm:ss')}'
+        WHERE dh_goods_id=${item.id}`);
+    })
+  )
     .then(() => {
       return {
         code: 0

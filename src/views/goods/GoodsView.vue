@@ -52,7 +52,7 @@
                     :value="item.num"
                     readonly
                     size="small"
-                    style="width: calc(100% - 160px)"
+                    style="width: calc(100% - 160px); text-align: center"
                   />
                   <a-button @click="selectGoods(item)" size="small">+</a-button>
                 </a-input-group>
@@ -61,7 +61,7 @@
           </a-list-item>
         </template>
       </a-list>
-      <a-popover trigger="click" placement="topRight">
+      <a-popover v-model:visible="paying" trigger="click" placement="topRight">
         <template #content>
           <div style="text-align: right">
             <p>支付订单共计：¥{{ order }}</p>
@@ -91,7 +91,8 @@ import {
   Input,
   Button,
   message,
-  Popover
+  Popover,
+  notification
 } from 'ant-design-vue';
 import { ShoppingOutlined } from '@ant-design/icons-vue';
 
@@ -121,6 +122,7 @@ export default defineComponent({
   setup() {
     const goodsList = ref([]);
     const shoppingCar = ref([]);
+    const paying = ref(false);
 
     function getCategories() {
       return window.ipcRenderer
@@ -176,6 +178,7 @@ export default defineComponent({
       }),
       goodsList,
       shoppingCar,
+      paying,
       selectGoods(query) {
         const index = shoppingCar.value.findIndex(item => item.id === query.id);
         const { num } = shoppingCar.value[index] || { num: 0 };
@@ -204,7 +207,24 @@ export default defineComponent({
         if (shoppingCar.value.length <= 0) {
           return;
         }
-        console.log('支付');
+        window.ipcRenderer
+          .invoke(
+            'api/goods/sale',
+            shoppingCar.value.map(item => {
+              return {
+                id: item.id,
+                num,
+                remain: item.store - item.num
+              };
+            })
+          )
+          .then(() => {
+            paying.value = false;
+            shoppingCar.value = [];
+            notification.success({
+              message: '支付成功'
+            });
+          });
       }
     };
   }
