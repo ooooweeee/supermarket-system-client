@@ -6,31 +6,51 @@
           <alibaba-outlined />
         </div>
         <router-link :to="{ name: 'employee' }" custom v-slot="{ navigate }">
-          <a-menu-item :disabled="false" @click="navigate" key="employee">
+          <a-menu-item
+            :disabled="!auth.includes('employee')"
+            @click="navigate"
+            key="employee"
+          >
             <team-outlined />
             <span>人员管理</span>
           </a-menu-item>
         </router-link>
         <router-link :to="{ name: 'category' }" custom v-slot="{ navigate }">
-          <a-menu-item @click="navigate" key="category">
+          <a-menu-item
+            :disabled="!auth.includes('category')"
+            @click="navigate"
+            key="category"
+          >
             <tags-outlined />
             <span>品类管理</span>
           </a-menu-item>
         </router-link>
         <router-link :to="{ name: 'goods' }" custom v-slot="{ navigate }">
-          <a-menu-item @click="navigate" key="goods">
+          <a-menu-item
+            :disabled="!auth.includes('goods')"
+            @click="navigate"
+            key="goods"
+          >
             <shopping-outlined />
             <span>商品管理</span>
           </a-menu-item>
         </router-link>
         <router-link :to="{ name: 'stock' }" custom v-slot="{ navigate }">
-          <a-menu-item @click="navigate" key="stock">
+          <a-menu-item
+            :disabled="!auth.includes('stock')"
+            @click="navigate"
+            key="stock"
+          >
             <gold-outlined />
             <span>库存管理</span>
           </a-menu-item>
         </router-link>
         <router-link :to="{ name: 'order' }" custom v-slot="{ navigate }">
-          <a-menu-item @click="navigate" key="order">
+          <a-menu-item
+            :disabled="!auth.includes('order')"
+            @click="navigate"
+            key="order"
+          >
             <gold-outlined />
             <span>订单管理</span>
           </a-menu-item>
@@ -45,6 +65,7 @@
 
 <script>
 import { defineComponent, ref } from 'vue';
+import { useStore } from 'vuex';
 import { RouterLink, RouterView } from 'vue-router';
 import { Layout, Menu } from 'ant-design-vue';
 import {
@@ -70,8 +91,11 @@ export default defineComponent({
     RouterView
   },
   setup() {
+    const store = useStore();
+
     return {
-      selectedKeys: ref(['employee'])
+      auth: store.state.userAuth,
+      selectedKeys: ref([store.state.userAuth[0]])
     };
   }
 });

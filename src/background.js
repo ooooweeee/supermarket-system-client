@@ -19,9 +19,14 @@ app.on('ready', async () => {
     createProtocol('app');
   }
   await database().createDatatable();
-  await database().asyncRun(
-    `REPLACE INTO dh_employees (dh_employee_phone, dh_employee_password, dh_employee_name) VALUES ('18000000000', '000000', 'oooweee')`
-  );
+  await database()
+    .asyncRun(
+      `INSERT INTO
+        dh_employees (dh_employee_phone, dh_employee_password, dh_employee_name, dh_employee_auth)
+      VALUES
+        ('18000000000', '000000', 'oooweee', 'employee,category,goods,stock,order')`
+    )
+    .catch(() => {});
 
   const win = new BrowserWindow({
     x: 0,

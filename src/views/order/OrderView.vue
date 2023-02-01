@@ -8,13 +8,19 @@
       :pagination="false"
     >
       <template #expandedRowRender="{ record }">
-        <a-descriptions v-for="item in record.list" :key="item.id">
-          <a-descriptions-item label="商品名称">{{
-            item.goodsName
-          }}</a-descriptions-item>
-          <a-descriptions-item label="销量">{{
-            item.saleNum
-          }}</a-descriptions-item>
+        <a-descriptions v-for="item in record.list" :key="item.goodsName">
+          <a-descriptions-item label="商品名称">
+            {{ item.goodsName }}
+          </a-descriptions-item>
+          <a-descriptions-item label="商品品类">
+            {{ item.categoryName }}
+          </a-descriptions-item>
+          <a-descriptions-item label="销量">
+            {{ item.saleNum }}
+          </a-descriptions-item>
+          <a-descriptions-item label="售价">
+            {{ item.salePrice }}
+          </a-descriptions-item>
         </a-descriptions>
       </template>
     </a-table>
@@ -45,6 +51,7 @@ export default defineComponent({
 
     function getData() {
       window.ipcRenderer.invoke('api/incidents').then(({ data } = {}) => {
+        console.log(data);
         orders.value = data.reduce((result, current) => {
           const index = result.findIndex(
             item => item.orderId === current.dh_incident_order
@@ -54,24 +61,30 @@ export default defineComponent({
               orderId: current.dh_incident_order,
               employeeId: current.dh_incident_employee_id,
               employeeName: current.dh_employee_name,
-              action: current.dh_incident_action,
+              action: current.dh_incident_action === 0 ? '出售' : '进货',
+              totalPrice:
+                current.dh_incident_sale_num * current.dh_goods_sale_price,
               list: [
                 {
                   id: current.dh_incident_id,
-                  goodsId: current.dh_incident_goods_id,
-                  goodsName: current.dh_goods_name,
-                  saleNum: current.dh_incident_sale_num
+                  goodsName: current.dh_incident_goods_name,
+                  saleNum: current.dh_incident_sale_num,
+                  categoryName: current.dh_category_name,
+                  salePrice: current.dh_goods_sale_price
                 }
               ]
             });
           } else {
             const tmp = result[index];
-            tmp.list.push({
-              id: current.dh_incident_id,
-              goodsId: current.dh_incident_goods_id,
-              goodsName: current.dh_goods_name,
-              saleNum: current.dh_incident_sale_num
-            });
+            (tmp.totalPrice +=
+              current.dh_incident_sale_num * current.dh_goods_sale_price),
+              tmp.list.push({
+                id: current.dh_incident_id,
+                goodsName: current.dh_incident_goods_name,
+                saleNum: current.dh_incident_sale_num,
+                categoryName: current.dh_category_name,
+                salePrice: current.dh_goods_sale_price
+              });
             result.splice(index, 1, tmp);
           }
           return result;
@@ -90,6 +103,11 @@ export default defineComponent({
           title: '操作员',
           dataIndex: 'employeeName',
           key: 'employeeName'
+        },
+        {
+          title: '交易总价',
+          dataIndex: 'totalPrice',
+          key: 'totalPrice'
         },
         {
           title: '类型',

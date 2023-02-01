@@ -81,6 +81,7 @@
 
 <script>
 import { defineComponent, reactive, ref, onMounted } from 'vue';
+import { useStore } from 'vuex';
 import {
   Form,
   Input,
@@ -106,6 +107,7 @@ export default defineComponent({
     'a-select-option': Select.Option
   },
   setup(_, { emit }) {
+    const store = useStore();
     const categories = ref([]);
     const formState = reactive({
       name: '',
@@ -135,15 +137,16 @@ export default defineComponent({
     return {
       categories,
       formState,
-      onSubmit({ name, price, salePrice, categoryId, store, state }) {
+      onSubmit({ name, price, salePrice, categoryId, store: num, state }) {
         window.ipcRenderer
           .invoke('api/goods/editor', {
             name,
             price,
             salePrice,
             categoryId,
-            store,
-            state: state ? 0 : 1
+            store: num,
+            state: state ? 0 : 1,
+            userId: store.state.userId
           })
           .then(({ code, msg } = {}) => {
             if (code !== 0) {

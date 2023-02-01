@@ -5,7 +5,12 @@
     </template>
   </a-page-header>
   <a-layout-content class="employee-content">
-    <a-table :dataSource="employees" :columns="columns" :pagination="false">
+    <a-table
+      rowKey="phone"
+      :dataSource="employees"
+      :columns="columns"
+      :pagination="false"
+    >
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'sex'">
           <man-outlined v-if="record.sex === 0" />
@@ -19,6 +24,12 @@
             @change="updateEmployee(record.id, record.state ? 1 : 0)"
           />
         </template>
+      </template>
+      <template #expandedRowRender="{ record }">
+        权限列表：
+        <a-tag v-for="item in record.auth" :key="item">
+          {{ item }}
+        </a-tag>
       </template>
     </a-table>
     <a-modal
@@ -40,7 +51,8 @@ import {
   Table,
   Switch,
   Button,
-  Modal
+  Modal,
+  Tag
 } from 'ant-design-vue';
 import { ManOutlined, WomanOutlined } from '@ant-design/icons-vue';
 import AddEmployee from '@/components/AddEmployee.vue';
@@ -55,6 +67,7 @@ export default defineComponent({
     [Switch.name]: Switch,
     [Button.name]: Button,
     [Modal.name]: Modal,
+    [Tag.name]: Tag,
     AddEmployee
   },
   setup() {
@@ -69,6 +82,7 @@ export default defineComponent({
             name: item.dh_employee_name,
             phone: item.dh_employee_phone,
             sex: item.dh_employee_sex,
+            auth: item.dh_employee_auth.split(','),
             address: item.dh_employee_address,
             state: item.dh_employee_state === 0
           };
@@ -98,6 +112,11 @@ export default defineComponent({
           title: '性别',
           dataIndex: 'sex',
           key: 'sex'
+        },
+        {
+          title: '权限',
+          dataIndex: 'auth',
+          key: 'auth'
         },
         {
           title: '联系地址',

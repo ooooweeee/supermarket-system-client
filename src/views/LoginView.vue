@@ -70,9 +70,11 @@ export default defineComponent({
             if (code !== 0) {
               throw msg;
             }
+            const auth = data.dh_employee_auth.split(',');
             store.commit('setUserId', data.dh_employee_id);
+            store.commit('setUserAuth', auth);
             router.push({
-              name: 'employee'
+              name: auth[0]
             });
           })
           .catch(err => {

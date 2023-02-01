@@ -215,6 +215,7 @@ export default defineComponent({
             shoppingCar.value.map(item => {
               return {
                 id: item.id,
+                name: item.name,
                 num: item.num,
                 remain: item.store - item.num,
                 userId: store.state.userId

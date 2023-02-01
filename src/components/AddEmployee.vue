@@ -47,6 +47,19 @@
         </a-radio>
       </a-radio-group>
     </a-form-item>
+    <a-form-item
+      label="选择权限"
+      :rules="[{ required: true, message: '请选择权限' }]"
+      name="auth"
+    >
+      <a-checkbox-group v-model:value="formState.auth">
+        <a-checkbox value="employee">人员管理</a-checkbox>
+        <a-checkbox value="category">品类管理</a-checkbox>
+        <a-checkbox value="goods">商品管理</a-checkbox>
+        <a-checkbox value="stock">库存管理</a-checkbox>
+        <a-checkbox value="order">订单管理</a-checkbox>
+      </a-checkbox-group>
+    </a-form-item>
     <a-form-item label="联系地址" name="address">
       <a-textarea
         v-model:value="formState.address"
@@ -77,7 +90,8 @@ import {
   Button,
   Avatar,
   Switch,
-  notification
+  notification,
+  Checkbox
 } from 'ant-design-vue';
 import {
   UserOutlined,
@@ -98,6 +112,8 @@ export default defineComponent({
     [Button.name]: Button,
     [Avatar.name]: Avatar,
     [Switch.name]: Switch,
+    [Checkbox.Group.name]: Checkbox.Group,
+    [Checkbox.name]: Checkbox,
     UserOutlined,
     ManOutlined,
     WomanOutlined
@@ -108,19 +124,21 @@ export default defineComponent({
       phone: '',
       password: '',
       sex: 0,
+      auth: [],
       address: '',
       state: true
     });
 
     return {
       formState,
-      onSubmit({ phone, password, name, sex, address, state }) {
+      onSubmit({ phone, password, name, sex, auth, address, state }) {
         window.ipcRenderer
           .invoke('api/employee/create', {
             phone,
             password,
             name,
             sex,
+            auth: auth.join(','),
             address,
             state: state ? 0 : 1
           })

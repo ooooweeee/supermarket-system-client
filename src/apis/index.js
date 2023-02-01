@@ -7,7 +7,10 @@ ipcMain.handle('api/login', async (_, { account, password } = {}) => {
   return database()
     .asyncGet(
       `SELECT
-        dh_employee_name FROM dh_employees
+        dh_employee_id,
+        dh_employee_name,
+        dh_employee_auth
+      FROM dh_employees
       WHERE
         dh_employee_phone='${account}' and dh_employee_password='${password}'`
     )
@@ -18,6 +21,7 @@ ipcMain.handle('api/login', async (_, { account, password } = {}) => {
       return {
         code: 0,
         data: {
+          dh_employee_auth: res.dh_employee_auth,
           dh_employee_id: res.dh_employee_id,
           dh_employee_name: res.dh_employee_name
         }
@@ -81,7 +85,7 @@ ipcMain.handle('api/employees', async () => {
     .asyncAll(
       `SELECT
         dh_employee_id, dh_employee_phone, dh_employee_name, dh_employee_sex,
-        dh_employee_address, dh_employee_state, dh_employee_update_date
+        dh_employee_address, dh_employee_state, dh_employee_auth, dh_employee_update_date
       FROM dh_employees`
     )
     .then((res = []) => {
@@ -116,7 +120,7 @@ ipcMain.handle('api/employee/editor', async (_, { id, state } = {}) => {
 
 ipcMain.handle(
   'api/employee/create',
-  async (_, { phone, password, name, sex, address, state } = {}) => {
+  async (_, { phone, password, name, sex, auth, address, state } = {}) => {
     return database()
       .asyncRun(
         `INSERT INTO dh_employees (
@@ -124,9 +128,10 @@ ipcMain.handle(
           dh_employee_password,
           dh_employee_name,
           dh_employee_sex,
+          dh_employee_auth,
           dh_employee_address,
           dh_employee_state
-        ) VALUES ('${phone}', '${password}', '${name}', ${sex}, '${address}', ${state})`
+        ) VALUES ('${phone}', '${password}', '${name}', ${sex}, '${auth}', '${address}', ${state})`
       )
       .then(() => {
         return {
@@ -141,12 +146,25 @@ ipcMain.handle(
 
 ipcMain.handle(
   'api/goods/editor',
-  async (_, { name, price, salePrice, categoryId, store, state } = {}) => {
+  async (
+    _,
+    { name, price, salePrice, categoryId, store, state, userId } = {}
+  ) => {
     const db = database();
+    const orderId = uuid();
     const { dh_goods_store = 0 } =
       (await db.asyncGet(
         `SELECT dh_goods_store FROM dh_goods WHERE dh_goods_name='${name}'`
       )) || {};
+
+    await db.asyncRun(`
+      INSERT INTO dh_incidents (
+        dh_incident_order,
+        dh_incident_action,
+        dh_incident_goods_name,
+        dh_incident_sale_num,
+        dh_incident_employee_id
+      ) VALUES ('${orderId}', 1, '${name}', ${store}, ${userId})`);
     return db
       .asyncRun(
         `REPLACE INTO dh_goods (
@@ -220,10 +238,10 @@ ipcMain.handle('api/goods/sale', async (_, list = []) => {
           INSERT INTO dh_incidents (
             dh_incident_order,
             dh_incident_action,
-            dh_incident_goods_id,
+            dh_incident_goods_name,
             dh_incident_sale_num,
             dh_incident_employee_id
-          ) VALUES ('${orderId}', 0, ${item.id}, ${item.num}, ${item.userId})`);
+          ) VALUES ('${orderId}', 0, '${item.name}', ${item.num}, ${item.userId})`);
     })
   ])
     .then(() => {
@@ -241,7 +259,8 @@ ipcMain.handle('api/incidents', async () => {
     .asyncAll(
       `SELECT * FROM dh_incidents
       LEFT JOIN dh_employees ON dh_incidents.dh_incident_employee_id=dh_employees.dh_employee_id
-      LEFT JOIN dh_goods ON dh_incidents.dh_incident_goods_id=dh_goods.dh_goods_id`
+      LEFT JOIN dh_goods ON dh_incidents.dh_incident_goods_name=dh_goods.dh_goods_name
+      LEFT JOIN dh_categories ON dh_goods.dh_goods_category_id=dh_categories.dh_category_id`
     )
     .then((res = []) => {
       return {
