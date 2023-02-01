@@ -2,7 +2,6 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import LoginView from '@/views/LoginView.vue';
 import HomeView from '@/views/HomeView.vue';
 import CategoryView from '@/views/category/CategoryView.vue';
-import CategoryEditor from '@/views/category/CategoryEditor.vue';
 import EmployeeView from '@/views/employee/EmployeeView.vue';
 import GoodsView from '@/views/goods/GoodsView.vue';
 import StockView from '@/views/stock/StockView.vue';
@@ -19,11 +18,6 @@ const router = createRouter({
           path: '',
           name: 'category',
           component: CategoryView
-        },
-        {
-          path: ':id',
-          name: 'category-editor',
-          component: CategoryEditor
         },
         {
           path: 'employee',
