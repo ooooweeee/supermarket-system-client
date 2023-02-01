@@ -60,7 +60,7 @@ class DB {
       )`),
       this.asyncRun(`CREATE TABLE IF NOT EXISTS dh_goods (
         dh_goods_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        dh_goods_name TEXT NOT NULL,
+        dh_goods_name TEXT NOT NULL UNIQUE,
         dh_goods_price INTEGER NOT NULL,
         dh_goods_sale_price INTEGER NOT NULL,
         dh_goods_category_id INTEGER NOT NULL,

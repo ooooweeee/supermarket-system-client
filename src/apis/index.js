@@ -29,7 +29,7 @@ ipcMain.handle('api/login', async (_, { account, password } = {}) => {
 ipcMain.handle('api/categories', async () => {
   return database()
     .asyncAll(`SELECT * FROM dh_categories`)
-    .then(res => {
+    .then((res = []) => {
       return {
         code: 0,
         data: res
@@ -63,7 +63,7 @@ ipcMain.handle('api/employees', async () => {
         dh_employee_address, dh_employee_state, dh_employee_update_date
       FROM dh_employees`
     )
-    .then(res => {
+    .then((res = []) => {
       return {
         code: 0,
         data: res
@@ -117,3 +117,68 @@ ipcMain.handle(
       });
   }
 );
+
+ipcMain.handle(
+  'api/goods/editor',
+  async (_, { name, price, salePrice, categoryId, store, state } = {}) => {
+    const db = database();
+    const { dh_goods_store = 0 } =
+      (await db.asyncGet(
+        `SELECT dh_goods_store FROM dh_goods WHERE dh_goods_name='${name}'`
+      )) || {};
+    return db
+      .asyncRun(
+        `REPLACE INTO dh_goods (
+          dh_goods_name,
+          dh_goods_price,
+          dh_goods_sale_price,
+          dh_goods_category_id,
+          dh_goods_store,
+          dh_goods_state
+        ) VALUES ('${name}', '${price}', '${salePrice}', ${categoryId}, '${
+          dh_goods_store + store
+        }', ${state})`
+      )
+      .then(() => {
+        return {
+          code: 0
+        };
+      })
+      .catch(err => {
+        return Promise.resolve({ code: -1, msg: err });
+      });
+  }
+);
+
+ipcMain.handle('api/goods', async () => {
+  return database()
+    .asyncAll(`SELECT * FROM dh_goods`)
+    .then((res = []) => {
+      return {
+        code: 0,
+        data: res
+      };
+    })
+    .catch(err => {
+      return Promise.resolve({ code: -1, msg: err });
+    });
+});
+
+ipcMain.handle('api/goods/state', async (_, { id, state } = {}) => {
+  return database()
+    .asyncRun(
+      `UPDATE dh_goods SET
+        dh_goods_state=${state},
+        dh_goods_update_date='${dayjs().format('YYYY-MM-DD HH:mm:ss')}'
+      WHERE
+        dh_goods_id=${id}`
+    )
+    .then(() => {
+      return {
+        code: 0
+      };
+    })
+    .catch(err => {
+      return Promise.resolve({ code: -1, msg: err });
+    });
+});

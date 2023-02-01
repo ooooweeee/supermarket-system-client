@@ -79,8 +79,11 @@ import {
   Switch,
   notification
 } from 'ant-design-vue';
-import { UserOutlined } from '@ant-design/icons-vue';
-import { ManOutlined, WomanOutlined } from '@ant-design/icons-vue';
+import {
+  UserOutlined,
+  ManOutlined,
+  WomanOutlined
+} from '@ant-design/icons-vue';
 
 export default defineComponent({
   emits: ['create-success'],

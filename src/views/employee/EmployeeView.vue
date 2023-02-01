@@ -118,10 +118,7 @@ export default defineComponent({
       updateEmployee(id, state) {
         window.ipcRenderer
           .invoke('api/employee/editor', { id, state })
-          .then(({ code, msg } = {}) => {
-            if (code !== 0) {
-              throw msg;
-            }
+          .then(() => {
             getData();
           });
       },

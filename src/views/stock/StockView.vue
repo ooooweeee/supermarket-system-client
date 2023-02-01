@@ -5,14 +5,25 @@
     </template>
   </a-page-header>
   <a-layout-content class="stock-content">
-    <a-table :dataSource="stocks" :columns="columns" :pagination="false" />
+    <a-table :dataSource="stocks" :columns="columns" :pagination="false">
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'state'">
+          <a-switch
+            :checked="record.state"
+            checked-children="正常"
+            un-checked-children="禁售"
+            @change="updateState(record.id, record.state ? 1 : 0)"
+          />
+        </template>
+      </template>
+    </a-table>
     <a-modal
       v-model:visible="visible"
       title="进货"
       :footer="null"
       :destroyOnClose="true"
     >
-      进货
+      <stock-goods @create-success="stockGoods()" />
     </a-modal>
   </a-layout-content>
 </template>
@@ -27,6 +38,7 @@ import {
   Button,
   Modal
 } from 'ant-design-vue';
+import StockGoods from '@/components/StockGoods.vue';
 
 export default defineComponent({
   components: {
@@ -35,30 +47,44 @@ export default defineComponent({
     [Table.name]: Table,
     [Switch.name]: Switch,
     [Button.name]: Button,
-    [Modal.name]: Modal
+    [Modal.name]: Modal,
+    StockGoods
   },
   setup() {
     const visible = ref(false);
     const stocks = ref([]);
 
-    function getData() {
-      window.ipcRenderer
-        .invoke('api/employees')
-        .then(({ code, msg, data } = {}) => {
-          if (code !== 0) {
-            throw msg;
-          }
-          stocks.value = data.map(item => {
+    function getCategories() {
+      return window.ipcRenderer
+        .invoke('api/categories')
+        .then(({ data } = {}) => {
+          return data.map(item => {
             return {
-              id: item.dh_employee_id,
-              name: item.dh_employee_name,
-              phone: item.dh_employee_phone,
-              sex: item.dh_employee_sex,
-              address: item.dh_employee_address,
-              state: item.dh_employee_state === 0
+              id: item.dh_category_id,
+              name: item.dh_category_name,
+              state: item.dh_category_state
             };
           });
         });
+    }
+
+    async function getData() {
+      const categories = await getCategories();
+      window.ipcRenderer.invoke('api/goods').then(({ data } = {}) => {
+        stocks.value = data.map(item => {
+          const { name: categoryName } =
+            categories.find(i => i.id === item.dh_goods_category_id) || {};
+          return {
+            id: item.dh_goods_id,
+            name: item.dh_goods_name,
+            price: item.dh_goods_price,
+            salePrice: item.dh_goods_sale_price,
+            categoryName,
+            store: item.dh_goods_store,
+            state: item.dh_goods_state === 0
+          };
+        });
+      });
     }
 
     onMounted(() => {
@@ -70,24 +96,29 @@ export default defineComponent({
       stocks,
       columns: [
         {
-          title: '姓名',
+          title: '名称',
           dataIndex: 'name',
           key: 'name'
         },
         {
-          title: '联系方式',
-          dataIndex: 'phone',
-          key: 'phone'
+          title: '价格',
+          dataIndex: 'price',
+          key: 'price'
         },
         {
-          title: '性别',
-          dataIndex: 'sex',
-          key: 'sex'
+          title: '售价',
+          dataIndex: 'salePrice',
+          key: 'salePrice'
         },
         {
-          title: '联系地址',
-          dataIndex: 'address',
-          key: 'address'
+          title: '品类',
+          dataIndex: 'categoryName',
+          key: 'categoryName'
+        },
+        {
+          title: '库存',
+          dataIndex: 'store',
+          key: 'store'
         },
         {
           title: '状态',
@@ -95,17 +126,12 @@ export default defineComponent({
           key: 'state'
         }
       ],
-      updateEmployee(id, state) {
-        window.ipcRenderer
-          .invoke('api/employee/editor', { id, state })
-          .then(({ code, msg } = {}) => {
-            if (code !== 0) {
-              throw msg;
-            }
-            getData();
-          });
+      updateState(id, state) {
+        window.ipcRenderer.invoke('api/goods/state', { id, state }).then(() => {
+          getData();
+        });
       },
-      addEmployee() {
+      stockGoods() {
         visible.value = false;
         getData();
       }
