@@ -30,8 +30,6 @@ app.on('ready', async () => {
     .catch(() => {});
 
   const win = new BrowserWindow({
-    x: 0,
-    y: 0,
     width: 1080,
     height: 720,
     resizable: false,
