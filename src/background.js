@@ -14,6 +14,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ]);
 Menu.setApplicationMenu(null);
+app.disableHardwareAcceleration();
 
 app.on('ready', async () => {
   if (!isDevelopment) {
