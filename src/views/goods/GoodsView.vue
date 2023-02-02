@@ -1,7 +1,10 @@
 <template>
   <a-layout class="goods-page">
     <a-layout-content class="goods-content goods-list">
-      <a-row :gutter="[0, 10]">
+      <a-row
+        :gutter="[0, 10]"
+        :class="['goods-list-wrapper', !goodsList.length && 'is-empty']"
+      >
         <template v-if="goodsList.length > 0">
           <a-col :span="24" v-for="item in goodsList" :key="item.id">
             <a-card :title="item.name">
@@ -30,7 +33,11 @@
             </a-card>
           </a-col>
         </template>
-        <a-col v-else> sss </a-col>
+        <a-col :span="24" v-else>
+          <a-empty>
+            <template #description>库存空</template>
+          </a-empty>
+        </a-col>
       </a-row>
     </a-layout-content>
     <a-layout-content class="goods-content shopping-car">
@@ -96,7 +103,8 @@ import {
   Button,
   message,
   Popover,
-  notification
+  notification,
+  Empty
 } from 'ant-design-vue';
 import { ShoppingOutlined } from '@ant-design/icons-vue';
 
@@ -121,7 +129,8 @@ export default defineComponent({
     [Input.Group.name]: Input.Group,
     [Button.name]: Button,
     [Popover.name]: Popover,
-    ShoppingOutlined
+    ShoppingOutlined,
+    'a-empty': Empty
   },
   setup() {
     const store = useStore();
@@ -250,6 +259,11 @@ export default defineComponent({
   @shoppingCarWidth: 280px;
   .goods-list {
     width: calc(100% - @shoppingCarWidth);
+
+    .goods-list-wrapper.is-empty {
+      min-height: 100%;
+      align-items: center;
+    }
   }
   .shopping-car {
     width: @shoppingCarWidth;
