@@ -1,5 +1,5 @@
 <template>
-  <a-page-header title="库存管理" sub-title="This is a subtitle">
+  <a-page-header title="库存管理">
     <template #extra>
       <a-button @click="visible = true" type="primary">进货</a-button>
     </template>
@@ -54,32 +54,16 @@ export default defineComponent({
     const visible = ref(false);
     const stocks = ref([]);
 
-    function getCategories() {
-      return window.ipcRenderer
-        .invoke('api/categories')
-        .then(({ data } = {}) => {
-          return data.map(item => {
-            return {
-              id: item.dh_category_id,
-              name: item.dh_category_name,
-              state: item.dh_category_state
-            };
-          });
-        });
-    }
-
-    async function getData() {
-      const categories = await getCategories();
+    function getData() {
       window.ipcRenderer.invoke('api/goods/all').then(({ data } = {}) => {
         stocks.value = data.map(item => {
-          const { name: categoryName } =
-            categories.find(i => i.id === item.dh_goods_category_id) || {};
           return {
             id: item.dh_goods_id,
             name: item.dh_goods_name,
             price: item.dh_goods_price,
             salePrice: item.dh_goods_sale_price,
-            categoryName,
+            categoryId: item.dh_category_id,
+            categoryName: item.dh_category_name,
             store: item.dh_goods_store,
             state: item.dh_goods_state === 0
           };

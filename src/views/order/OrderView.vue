@@ -1,5 +1,5 @@
 <template>
-  <a-page-header title="订单管理" sub-title="This is a subtitle" />
+  <a-page-header title="订单管理" />
   <a-layout-content class="order-content">
     <a-table
       rowKey="orderId"
@@ -100,7 +100,6 @@ export default defineComponent({
           }
           return result;
         }, []);
-        console.log(orders.value.length);
       });
     }
 

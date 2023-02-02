@@ -1,5 +1,5 @@
 <template>
-  <a-page-header title="人员管理" sub-title="This is a subtitle">
+  <a-page-header title="人员管理">
     <template #extra>
       <a-button @click="visible = true" type="primary">新增</a-button>
     </template>

@@ -140,7 +140,6 @@ export default defineComponent({
 
     function getData() {
       window.ipcRenderer.invoke('api/goods').then(({ data } = {}) => {
-        console.log(data);
         goodsList.value = data.reduce((result, current) => {
           const index = result.findIndex(
             item => item.id === current.dh_category_id

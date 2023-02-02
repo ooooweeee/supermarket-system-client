@@ -1,5 +1,5 @@
 <template>
-  <a-page-header title="商品品类" sub-title="This is a subtitle">
+  <a-page-header title="商品品类">
     <template #extra>
       <a-button v-if="catagories.length" @click="visible = true" type="primary">
         创建
