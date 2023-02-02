@@ -69,7 +69,7 @@ app.on('ready', async () => {
         label: '退出',
         type: 'normal',
         click() {
-          app.quit();
+          app.exit();
         }
       }
     ])
