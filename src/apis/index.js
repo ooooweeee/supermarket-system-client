@@ -12,7 +12,7 @@ ipcMain.handle('api/login', async (_, { account, password } = {}) => {
         dh_employee_auth
       FROM dh_employees
       WHERE
-        dh_employee_phone='${account}' and dh_employee_password='${password}'`
+        dh_employee_phone='${account}' and dh_employee_password='${password}' and dh_employee_state=0`
     )
     .then(res => {
       if (!res) {
@@ -33,6 +33,20 @@ ipcMain.handle('api/login', async (_, { account, password } = {}) => {
 });
 
 ipcMain.handle('api/categories', async () => {
+  return database()
+    .asyncAll(`SELECT * FROM dh_categories WHERE dh_category_state=0`)
+    .then((res = []) => {
+      return {
+        code: 0,
+        data: res
+      };
+    })
+    .catch(err => {
+      return Promise.resolve({ code: -1, msg: err });
+    });
+});
+
+ipcMain.handle('api/categories/all', async () => {
   return database()
     .asyncAll(`SELECT * FROM dh_categories`)
     .then((res = []) => {
@@ -152,32 +166,45 @@ ipcMain.handle(
   ) => {
     const db = database();
     const orderId = uuid();
-    const { dh_goods_store = 0 } =
-      (await db.asyncGet(
-        `SELECT dh_goods_store FROM dh_goods WHERE dh_goods_name='${name}'`
-      )) || {};
-
-    await db.asyncRun(`
-      INSERT INTO dh_incidents (
-        dh_incident_order,
-        dh_incident_action,
-        dh_incident_goods_name,
-        dh_incident_sale_num,
-        dh_incident_employee_id
-      ) VALUES ('${orderId}', 1, '${name}', ${store}, ${userId})`);
     return db
       .asyncRun(
-        `REPLACE INTO dh_goods (
+        `INSERT INTO dh_goods (
           dh_goods_name,
           dh_goods_price,
           dh_goods_sale_price,
           dh_goods_category_id,
           dh_goods_store,
           dh_goods_state
-        ) VALUES ('${name}', '${price}', '${salePrice}', ${categoryId}, '${
-          dh_goods_store + store
-        }', ${state})`
+        ) VALUES ('${name}', '${price}', '${salePrice}', ${categoryId}, '${store}', ${state})`
       )
+      .catch(async () => {
+        const { dh_goods_store = 0 } =
+          (await db.asyncGet(
+            `SELECT dh_goods_store FROM dh_goods WHERE dh_goods_name='${name}'`
+          )) || {};
+        return db.asyncRun(`
+          UPDATE dh_goods SET
+            dh_goods_price=${price},
+            dh_goods_sale_price=${salePrice},
+            dh_goods_category_id=${categoryId},
+            dh_goods_store=${dh_goods_store + store},
+            dh_goods_state=${state}
+          WHERE dh_goods_name='${name}'`);
+      })
+      .then(async () => {
+        const { dh_goods_id = 0 } =
+          (await db.asyncGet(
+            `SELECT dh_goods_id FROM dh_goods WHERE dh_goods_name='${name}'`
+          )) || {};
+        return db.asyncRun(`
+          INSERT INTO dh_incidents (
+            dh_incident_order,
+            dh_incident_action,
+            dh_incident_goods_id,
+            dh_incident_sale_num,
+            dh_incident_employee_id
+          ) VALUES ('${orderId}', 1, ${dh_goods_id}, ${store}, ${userId})`);
+      })
       .then(() => {
         return {
           code: 0
@@ -191,7 +218,27 @@ ipcMain.handle(
 
 ipcMain.handle('api/goods', async () => {
   return database()
-    .asyncAll(`SELECT * FROM dh_goods`)
+    .asyncAll(
+      `SELECT * FROM dh_goods
+      LEFT JOIN dh_categories ON dh_goods.dh_goods_category_id=dh_categories.dh_category_id
+      WHERE dh_goods.dh_goods_state=0 and dh_categories.dh_category_state=0 and dh_goods.dh_goods_store>0`
+    )
+    .then((res = []) => {
+      return {
+        code: 0,
+        data: res
+      };
+    })
+    .catch(err => {
+      return Promise.resolve({ code: -1, msg: err });
+    });
+});
+
+ipcMain.handle('api/goods/all', async () => {
+  return database()
+    .asyncAll(
+      `SELECT * FROM dh_goods LEFT JOIN dh_categories ON dh_goods.dh_goods_category_id=dh_categories.dh_category_id`
+    )
     .then((res = []) => {
       return {
         code: 0,
@@ -228,20 +275,20 @@ ipcMain.handle('api/goods/sale', async (_, list = []) => {
   return Promise.all([
     ...list.map(item => {
       return db.asyncRun(`
-          UPDATE dh_goods SET
-            dh_goods_store=${item.remain},
-            dh_goods_update_date='${dayjs().format('YYYY-MM-DD HH:mm:ss')}'
-          WHERE dh_goods_id=${item.id}`);
+        UPDATE dh_goods SET
+          dh_goods_store=${item.remain},
+          dh_goods_update_date='${dayjs().format('YYYY-MM-DD HH:mm:ss')}'
+        WHERE dh_goods_id=${item.id}`);
     }),
     ...list.map(item => {
       return db.asyncRun(`
-          INSERT INTO dh_incidents (
-            dh_incident_order,
-            dh_incident_action,
-            dh_incident_goods_name,
-            dh_incident_sale_num,
-            dh_incident_employee_id
-          ) VALUES ('${orderId}', 0, '${item.name}', ${item.num}, ${item.userId})`);
+        INSERT INTO dh_incidents (
+          dh_incident_order,
+          dh_incident_action,
+          dh_incident_goods_id,
+          dh_incident_sale_num,
+          dh_incident_employee_id
+        ) VALUES ('${orderId}', 0, ${item.id}, ${item.num}, ${item.userId})`);
     })
   ])
     .then(() => {
@@ -259,7 +306,7 @@ ipcMain.handle('api/incidents', async () => {
     .asyncAll(
       `SELECT * FROM dh_incidents
       LEFT JOIN dh_employees ON dh_incidents.dh_incident_employee_id=dh_employees.dh_employee_id
-      LEFT JOIN dh_goods ON dh_incidents.dh_incident_goods_name=dh_goods.dh_goods_name
+      LEFT JOIN dh_goods ON dh_incidents.dh_incident_goods_id=dh_goods.dh_goods_id
       LEFT JOIN dh_categories ON dh_goods.dh_goods_category_id=dh_categories.dh_category_id`
     )
     .then((res = []) => {

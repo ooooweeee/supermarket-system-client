@@ -6,7 +6,13 @@
       :dataSource="orders"
       :columns="columns"
       :pagination="false"
+      sticky
     >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'action'">
+          {{ record.action === 0 ? '销售' : '进货' }}
+        </template>
+      </template>
       <template #expandedRowRender="{ record }">
         <a-descriptions v-for="item in record.list" :key="item.goodsName">
           <a-descriptions-item label="商品名称">
@@ -15,11 +21,11 @@
           <a-descriptions-item label="商品品类">
             {{ item.categoryName }}
           </a-descriptions-item>
-          <a-descriptions-item label="销量">
+          <a-descriptions-item :label="record.action === 0 ? '销量' : '数量'">
             {{ item.saleNum }}
           </a-descriptions-item>
-          <a-descriptions-item label="售价">
-            {{ item.salePrice }}
+          <a-descriptions-item :label="record.action === 0 ? '售价' : '单价'">
+            {{ record.action === 0 ? item.salePrice : item.price }}
           </a-descriptions-item>
         </a-descriptions>
       </template>
@@ -51,7 +57,6 @@ export default defineComponent({
 
     function getData() {
       window.ipcRenderer.invoke('api/incidents').then(({ data } = {}) => {
-        console.log(data);
         orders.value = data.reduce((result, current) => {
           const index = result.findIndex(
             item => item.orderId === current.dh_incident_order
@@ -61,34 +66,41 @@ export default defineComponent({
               orderId: current.dh_incident_order,
               employeeId: current.dh_incident_employee_id,
               employeeName: current.dh_employee_name,
-              action: current.dh_incident_action === 0 ? '出售' : '进货',
+              action: current.dh_incident_action,
               totalPrice:
-                current.dh_incident_sale_num * current.dh_goods_sale_price,
+                current.dh_incident_action === 0
+                  ? current.dh_incident_sale_num * current.dh_goods_sale_price
+                  : current.dh_incident_sale_num * current.dh_goods_price,
               list: [
                 {
                   id: current.dh_incident_id,
-                  goodsName: current.dh_incident_goods_name,
+                  goodsName: current.dh_goods_name,
                   saleNum: current.dh_incident_sale_num,
                   categoryName: current.dh_category_name,
-                  salePrice: current.dh_goods_sale_price
+                  salePrice: current.dh_goods_sale_price,
+                  price: current.dh_goods_price
                 }
               ]
             });
           } else {
             const tmp = result[index];
             (tmp.totalPrice +=
-              current.dh_incident_sale_num * current.dh_goods_sale_price),
+              current.dh_incident_action === 0
+                ? current.dh_incident_sale_num * current.dh_goods_sale_price
+                : current.dh_incident_sale_num * current.dh_goods_price),
               tmp.list.push({
                 id: current.dh_incident_id,
-                goodsName: current.dh_incident_goods_name,
+                goodsName: current.dh_goods_name,
                 saleNum: current.dh_incident_sale_num,
                 categoryName: current.dh_category_name,
-                salePrice: current.dh_goods_sale_price
+                salePrice: current.dh_goods_sale_price,
+                price: current.dh_goods_price
               });
             result.splice(index, 1, tmp);
           }
           return result;
         }, []);
+        console.log(orders.value.length);
       });
     }
 
@@ -123,7 +135,8 @@ export default defineComponent({
 <style lang="less">
 .order-content {
   box-sizing: border-box;
-  padding: 10px;
+  margin-top: 10px;
+  padding: 0 10px 10px;
   overflow: overlay;
 }
 </style>

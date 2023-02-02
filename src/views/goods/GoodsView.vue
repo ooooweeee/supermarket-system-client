@@ -2,32 +2,35 @@
   <a-layout class="goods-page">
     <a-layout-content class="goods-content goods-list">
       <a-row :gutter="[0, 10]">
-        <a-col :span="24" v-for="item in goodsList" :key="item.id">
-          <a-card :title="item.name">
-            <a-card-grid
-              v-for="i in item.goods"
-              :key="i.id"
-              @click="selectGoods(i)"
-              class="goods-item hand"
-            >
-              <a-image
-                class="goods-pic"
-                :width="50"
-                :height="50"
-                src=""
-                fallback="/fallback.png"
-                :preview="false"
-              />
-              <a-statistic
-                :title="i.name"
-                :value="i.salePrice"
-                prefix="¥"
-                :value-style="{ 'font-size': '16px' }"
+        <template v-if="goodsList.length > 0">
+          <a-col :span="24" v-for="item in goodsList" :key="item.id">
+            <a-card :title="item.name">
+              <a-card-grid
+                v-for="i in item.goods"
+                :key="i.id"
+                @click="selectGoods(i)"
+                class="goods-item hand"
               >
-              </a-statistic>
-            </a-card-grid>
-          </a-card>
-        </a-col>
+                <a-image
+                  class="goods-pic"
+                  :width="50"
+                  :height="50"
+                  src=""
+                  fallback="/fallback.png"
+                  :preview="false"
+                />
+                <a-statistic
+                  :title="i.name"
+                  :value="i.salePrice"
+                  prefix="¥"
+                  :value-style="{ 'font-size': '16px' }"
+                >
+                </a-statistic>
+              </a-card-grid>
+            </a-card>
+          </a-col>
+        </template>
+        <a-col v-else> sss </a-col>
       </a-row>
     </a-layout-content>
     <a-layout-content class="goods-content shopping-car">
@@ -126,45 +129,38 @@ export default defineComponent({
     const shoppingCar = ref([]);
     const paying = ref(false);
 
-    function getCategories() {
-      return window.ipcRenderer
-        .invoke('api/categories')
-        .then(({ data } = {}) => {
-          return data.map(item => {
-            return {
-              id: item.dh_category_id,
-              name: item.dh_category_name,
-              state: item.dh_category_state
-            };
-          });
-        });
-    }
-
-    async function getGoods() {
-      return window.ipcRenderer.invoke('api/goods').then(({ data } = {}) => {
-        return data.map(item => {
-          return {
-            id: item.dh_goods_id,
-            name: item.dh_goods_name,
-            categoryId: item.dh_goods_category_id,
-            price: item.dh_goods_price,
-            salePrice: item.dh_goods_sale_price,
-            store: item.dh_goods_store,
-            state: item.dh_goods_state
-          };
-        });
-      });
-    }
-
-    async function getData() {
-      const goodsTmp = await getGoods();
-      const catagoryTmp = await getCategories();
-      goodsList.value = catagoryTmp.map(item => {
-        return {
-          id: item.id,
-          name: item.name,
-          goods: goodsTmp.filter(i => i.categoryId === item.id)
-        };
+    function getData() {
+      window.ipcRenderer.invoke('api/goods').then(({ data } = {}) => {
+        console.log(data);
+        goodsList.value = data.reduce((result, current) => {
+          const index = result.findIndex(
+            item => item.id === current.dh_category_id
+          );
+          if (index === -1) {
+            result.push({
+              id: current.dh_category_id,
+              name: current.dh_category_name,
+              goods: [
+                {
+                  id: current.dh_goods_id,
+                  name: current.dh_goods_name,
+                  salePrice: current.dh_goods_sale_price,
+                  store: current.dh_goods_store
+                }
+              ]
+            });
+          } else {
+            const tmp = result[index];
+            tmp.goods.push({
+              id: current.dh_goods_id,
+              name: current.dh_goods_name,
+              salePrice: current.dh_goods_sale_price,
+              store: current.dh_goods_store
+            });
+            result.splice(index, 1, tmp);
+          }
+          return result;
+        }, []);
       });
     }
 
@@ -225,6 +221,7 @@ export default defineComponent({
           .then(() => {
             paying.value = false;
             shoppingCar.value = [];
+            getData();
             notification.success({
               message: '支付成功'
             });

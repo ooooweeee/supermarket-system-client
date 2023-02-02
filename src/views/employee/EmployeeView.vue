@@ -10,6 +10,7 @@
       :dataSource="employees"
       :columns="columns"
       :pagination="false"
+      sticky
     >
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'sex'">
@@ -114,11 +115,6 @@ export default defineComponent({
           key: 'sex'
         },
         {
-          title: '权限',
-          dataIndex: 'auth',
-          key: 'auth'
-        },
-        {
           title: '联系地址',
           dataIndex: 'address',
           key: 'address'
@@ -148,7 +144,8 @@ export default defineComponent({
 <style lang="less">
 .employee-content {
   box-sizing: border-box;
-  padding: 10px;
+  margin-top: 10px;
+  padding: 0 10px 10px;
   overflow: overlay;
 }
 </style>

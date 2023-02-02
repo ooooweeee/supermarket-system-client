@@ -51,7 +51,7 @@
             @click="navigate"
             key="order"
           >
-            <gold-outlined />
+            <reconciliation-outlined />
             <span>订单管理</span>
           </a-menu-item>
         </router-link>
@@ -73,7 +73,8 @@ import {
   TeamOutlined,
   GoldOutlined,
   TagsOutlined,
-  ShoppingOutlined
+  ShoppingOutlined,
+  ReconciliationOutlined
 } from '@ant-design/icons-vue';
 
 export default defineComponent({
@@ -87,6 +88,7 @@ export default defineComponent({
     GoldOutlined,
     TagsOutlined,
     ShoppingOutlined,
+    ReconciliationOutlined,
     RouterLink,
     RouterView
   },

@@ -5,7 +5,7 @@
     </template>
   </a-page-header>
   <a-layout-content class="stock-content">
-    <a-table :dataSource="stocks" :columns="columns" :pagination="false">
+    <a-table :dataSource="stocks" :columns="columns" :pagination="false" sticky>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'state'">
           <a-switch
@@ -70,7 +70,7 @@ export default defineComponent({
 
     async function getData() {
       const categories = await getCategories();
-      window.ipcRenderer.invoke('api/goods').then(({ data } = {}) => {
+      window.ipcRenderer.invoke('api/goods/all').then(({ data } = {}) => {
         stocks.value = data.map(item => {
           const { name: categoryName } =
             categories.find(i => i.id === item.dh_goods_category_id) || {};
@@ -143,7 +143,8 @@ export default defineComponent({
 <style lang="less">
 .stock-content {
   box-sizing: border-box;
-  padding: 10px;
+  margin-top: 10px;
+  padding: 0 10px 10px;
   overflow: overlay;
 }
 </style>

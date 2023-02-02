@@ -89,7 +89,7 @@ export default defineComponent({
     const catagories = ref([]);
 
     function getData() {
-      window.ipcRenderer.invoke('api/categories').then(({ data } = {}) => {
+      window.ipcRenderer.invoke('api/categories/all').then(({ data } = {}) => {
         catagories.value = data.map(item => {
           return {
             id: item.dh_category_id,
